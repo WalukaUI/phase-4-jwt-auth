@@ -5,9 +5,12 @@ export default function HomePage() {
   const [password, setPassword] = useState();
 
   const [user, setuser] = useState();
+  const [allusers, setAllusers] = useState();
   const [logindetails, setLoginDetails] = useState({});
 
   const token = localStorage.getItem("jwt");
+
+  //Auto login.....................................
 
   useEffect(() => {
     fetch("http://localhost:3000/api/v1/profile", {
@@ -24,7 +27,8 @@ export default function HomePage() {
         });
       }
     });
-  }, []);
+  }, [token]);
+  //Login........................................
 
   function login(e) {
     e.preventDefault();
@@ -46,12 +50,14 @@ export default function HomePage() {
       }
     });
   }
+  //Logout ...................................
 
   function logout(e) {
     e.preventDefault();
     localStorage.removeItem("jwt");
     setuser(false);
   }
+  // Create new user............................
 
   function createUser(e) {
     e.preventDefault();
@@ -77,21 +83,24 @@ export default function HomePage() {
         setuser(res.user.username);
       });
   }
+  //GET all users......................................
 
-  //   useEffect(() => {
-  //     fetch("http://localhost:3000/api/v1/show", {
-  //       method: "GET",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${token}`,
-  //         Accept: "application/json",
-  //       },
-  //     })
-  //       .then((r) => r.json())
-  //       .then((res) => {
-  //         console.log(res);
-  //       });
-  //   }, [setIslogged]);
+  useEffect(() => {
+    fetch("http://localhost:3000/api/v1/show", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        setAllusers(res);
+      });
+  }, [token]);
+
+  //Create New user Object..................
 
   function loginguser(e) {
     e.preventDefault();
@@ -101,8 +110,11 @@ export default function HomePage() {
 
   return (
     <div>
-      <button onClick={logout}>Log Out</button>
+      <button onClick={logout} style={{ backgroundColor: "red" }}>
+        Log Out
+      </button>
       <h1>{user ? `logged in as ${user}` : "not logged in"}</h1>
+      <hr />
       <h3>Login</h3>
       <form onSubmit={login}>
         <label>
@@ -129,6 +141,9 @@ export default function HomePage() {
         </label>
         <button type="submit">Submuit</button>
       </form>
+      <hr />
+      <h3>List of Users</h3>
+      <ul>{allusers ? allusers.map((e) => <li>{e.username}</li>) : ""}</ul>
     </div>
   );
 }
